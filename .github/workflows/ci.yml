@@ -29,3 +29,8 @@ jobs:
               run: npm test
             - name: "Build the app"
               run: npm run build
+            - name: "upload product-rready build files"
+              uses: actions/upload-artifact@v3
+              with:
+                name: product-ready-build
+                path: dist
