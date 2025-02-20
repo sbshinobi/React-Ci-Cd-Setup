@@ -22,4 +22,4 @@ jobs:
             - name: "Run the tests"
               run: npm test
             - name: "Deploy to aws"
-              run: pm2 start src/main.jsx --interpreter babel-node
+              run: pm2 start src/main.jsx
