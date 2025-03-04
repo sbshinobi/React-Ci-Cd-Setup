@@ -8,6 +8,7 @@ pipeline {
                     reuseNode true 
 
                 }
+            }
                 steps{
                    sh '''
                       ls -l
@@ -20,5 +21,4 @@ pipeline {
                 }
             }
         }
-    }
 }
