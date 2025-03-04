@@ -11,46 +11,46 @@ pipeline {
         }
         stage('Checkout Code') {
             steps {
-                // Fixed lowercase 'checkout' command
-                checkout scm
+                checkout(scm)  // Fixed syntax: checkout(scm) instead of "Checkout scm"
             }
         }
         stage('Build') {
             agent {
                 docker {
-                    // Use valid Node.js image tag (example: 20-alpine3.20)
-                    image 'node:20-alpine3.20'
-                    // Avoid running as root unless necessary
-                    args '-u node --shm-size=1gb'
+                    // Use valid Node.js image (verify tags at https://hub.docker.com/_/node)
+                    image 'node:20-alpine'  // Simplified valid tag
+                    args '-u root --shm-size=1gb'  // Run as root temporarily for debugging
                     reuseNode true
                 }
             }
             environment {
-                // Custom cache/temp directories to control space usage
+                // Use relative paths for temp/cache
                 npm_config_cache = 'npm_cache'
                 TEMP = 'tmp'
             }
             steps {
                 sh '''
-                    # Verify workspace structure
+                    # Debug workspace
+                    echo "Workspace path: ${WORKSPACE}"
                     ls -al
                     
-                    # Use clean npm install
-                    npm ci --no-audit --prefer-offline
+                    # Install dependencies
+                    npm install --no-audit --prefer-offline
                     
-                    # Build with cleanup
+                    # Build
                     npm run build
                     
-                    # Clean cache after build
+                    # Cleanup
                     rm -rf npm_cache tmp
                 '''
             }
             post {
                 always {
-                    // Clean Docker container after build
-                    script {
-                        docker image prune -f
-                    }
+                    cleanWs(
+                        cleanWhenAborted: true,
+                        cleanWhenFailure: true,
+                        deleteDirs: true
+                    )
                 }
             }
         }
