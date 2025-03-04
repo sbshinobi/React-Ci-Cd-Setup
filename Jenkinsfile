@@ -1,6 +1,19 @@
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout(true)
+    }
     stages {
+        stage('Clean up code') {
+            steps{
+                cleanWs()
+            }
+        }
+        stage('Checkout using SCM') {
+            steps{
+                Checkout scm
+            }
+        }
         stage('Build') {
             agent {
                 docker {
@@ -9,10 +22,7 @@ pipeline {
                     reuseNode true
                 }
             }
-            steps {
-                // Clean up the workspace
-                cleanWs()
-                
+            steps {                
                 // Build the project
                 sh '''
                     ls -l
