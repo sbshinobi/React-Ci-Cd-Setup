@@ -4,34 +4,54 @@ pipeline {
         skipDefaultCheckout(true)
     }
     stages {
-        stage('Clean up code') {
-            steps{
+        stage('Clean Workspace') {
+            steps {
                 cleanWs()
             }
         }
-        stage('Checkout using SCM') {
-            steps{
-                Checkout scm
+        stage('Checkout Code') {
+            steps {
+                // Fixed lowercase 'checkout' command
+                checkout scm
             }
         }
         stage('Build') {
             agent {
                 docker {
-                    image 'node:22.11.0-alpine3.20'
-                    args '-u root'
+                    // Use valid Node.js image tag (example: 20-alpine3.20)
+                    image 'node:20-alpine3.20'
+                    // Avoid running as root unless necessary
+                    args '-u node --shm-size=1gb'
                     reuseNode true
                 }
             }
-            steps {                
-                // Build the project
+            environment {
+                // Custom cache/temp directories to control space usage
+                npm_config_cache = 'npm_cache'
+                TEMP = 'tmp'
+            }
+            steps {
                 sh '''
-                    ls -l
-                    node --version
-                    npm --version
-                    npm install
+                    # Verify workspace structure
+                    ls -al
+                    
+                    # Use clean npm install
+                    npm ci --no-audit --prefer-offline
+                    
+                    # Build with cleanup
                     npm run build
-                    ls -l
+                    
+                    # Clean cache after build
+                    rm -rf npm_cache tmp
                 '''
+            }
+            post {
+                always {
+                    // Clean Docker container after build
+                    script {
+                        docker image prune -f
+                    }
+                }
             }
         }
     }
