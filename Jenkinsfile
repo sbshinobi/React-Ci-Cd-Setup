@@ -1,19 +1,13 @@
 pipeline {
     agent any
+    environment {
+        MY_VAr = 'my value'
+    }
     options {
         skipDefaultCheckout(true)
     }
     stages {
-        stage('Clean Workspace') {
-            steps {
-                cleanWs()
-            }
-        }
-        stage('Checkout Code') {
-            steps {
-                checkout(scm)  // Fixed syntax: checkout(scm) instead of "Checkout scm"
-            }
-        }
+        
         stage('Build') {
             agent {
                 docker {
@@ -44,14 +38,22 @@ pipeline {
                     rm -rf npm_cache tmp
                 '''
             }
-            post {
-                always {
-                    cleanWs(
-                        cleanWhenAborted: true,
-                        cleanWhenFailure: true,
-                        deleteDirs: true
-                    )
+            
+        }
+        stage('Deploy') {
+            agent{
+                docker {
+                    // Use valid Node.js image (verify tags at https://hub.docker.com/_/node)
+                    image 'node:20-alpine'  // Simplified valid tag
+                    args '-u root --shm-size=1gb'  // Run as root temporarily for debugging
+                    reuseNode true
                 }
+            }
+            steps {
+                sh '''
+                   npm install -g vercel
+                   echo $MY_VAR
+                   '''
             }
         }
     }
