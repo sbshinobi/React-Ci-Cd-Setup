@@ -14,6 +14,7 @@ pipeline {
             }
         }
         stage('Take approval'){
+            agent any
             steps{
                 input 'Should we deploy?'
             }
