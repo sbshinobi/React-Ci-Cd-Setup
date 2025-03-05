@@ -23,7 +23,7 @@ pipeline {
             agent {
                 docker {
                     image 'node:20-alpine'
-                    args '-user root --shm-size=1gb'
+                    args '-u root --shm-size=1gb'
                 }
             }
             steps {
