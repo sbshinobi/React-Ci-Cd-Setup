@@ -46,16 +46,21 @@ pipeline {
                 '''
             }
         }
+        stage('Cleanup') {
+            agent any
+            steps {
+                cleanWs(
+                    cleanWhenNotBuilt: false,
+                    deleteDirs: true,
+                    disableDeferredWipeout: true,
+                    notFailBuild: true
+                )
+            }
+        }
     }
     
     post {
-        always {
-            cleanWs(cleanWhenNotBuilt: false,
-                    deleteDirs: true,
-                    disableDeferredWipeout: true,
-                    notFailBuild: true)
-        }
-        
+       
         failure {
             echo "Pipeline failed"
         }
