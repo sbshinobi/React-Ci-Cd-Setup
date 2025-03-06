@@ -19,8 +19,8 @@ pipeline {
         stage('Deploy to Nginx') {
             steps {
                 sh '''
-                     cp -r dist/* /var/www/my-project/
-                     systemctl reload nginx
+                    sudo cp -r dist/* /var/www/my-project/
+                    sudo systemctl reload nginx
                 '''
             }
         }
